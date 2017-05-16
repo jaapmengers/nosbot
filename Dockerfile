@@ -20,8 +20,6 @@ RUN mkdir /temp && curl -o /temp/model.zip https://storage.googleapis.com/nosbot
 
 RUN unzip /temp/model.zip -d /temp
 
-WORKDIR /src
-
 COPY generate/ /src/generate
 COPY selection/ /src/selection
 
