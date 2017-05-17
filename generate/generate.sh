@@ -1,4 +1,4 @@
-prime=$(redis-cli srandmember generated)
+prime=$(redis-cli get prime)
 
 if [ -z "$prime" ]
 then
@@ -6,3 +6,5 @@ then
 fi
 
 python generate/sample.py --prime "$prime" --pick 2
+
+redis-cli set prime "$(redis-cli srandmember generated)"
