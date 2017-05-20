@@ -1,18 +1,7 @@
 FROM tensorflow/tensorflow
 
 RUN curl -sL https://deb.nodesource.com/setup_6.x | bash -
-RUN apt-get install -y nodejs redis-server
-
-# Next steps:
-# 1. Script maken om met LPOP messages uit de queue te lezen en die te tweeten
-# 2. Uitzoeken hoe met cron dat script en generate.sh gedraaid kunnen worden
-# 3. Setup in docker afronden. Totale doorloop doen van genereren, selecteren en tweeten
-# 4. Alle dependencies in dockerfile zetten en checken dat alles goed geinstalleerd wordt.
-# 5. Stap toevoegen aan dockerfile om model uit bucket te halen
-# 6. Alles in git zetten en checken of 't op werklaptop draait
-# 7. Dockerfile op digitalocean draaien
-# 8. Script maken om random image uit NOS-archief te pakken
-# 9. Naam verzinnen voor Bot
+RUN apt-get install -y nodejs redis-server rsyslog
 
 RUN mkdir /data
 
@@ -20,15 +9,23 @@ RUN mkdir /temp && curl -o /temp/model.zip https://storage.googleapis.com/nosbot
 
 RUN unzip /temp/model.zip -d /temp
 
-# COPY generate/ /src/generate
-# COPY selection/ /src/selection
+COPY generate/ /src/generate
+COPY selection/ /src/selection
+COPY tweet/ /src/tweet
+COPY package.json /src/package.json
+COPY startup.sh /src/startup.sh
+
+COPY process_cron /etc/cron.d/process_cron
+RUN chmod 0644 /etc/cron.d/process_cron
+RUN touch /var/log/cron.log
 
 WORKDIR /src/generate
 
 RUN pip install redis
 
-WORKDIR /src/selection
+WORKDIR /src
 
 RUN npm i
+RUN npm i forever -g
 
-RUN redis-server --daemonize yes
+CMD ["bash", "/src/startup.sh"]

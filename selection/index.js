@@ -4,11 +4,12 @@ const redis = require('redis'),
       client = redis.createClient();
 
 var newMessageHandler;
+var busy = false;
 
 setInterval(processMessages, 5000);
 
 function processMessages() {
-  if(newMessageHandler) {
+  if(newMessageHandler && !busy) {
     client.smembers('generated', (err, msgs) => {
       if(msgs) {
         newMessageHandler(msgs);
@@ -30,31 +31,43 @@ bot.startRTM(function(err,bot,payload) {
   }
 
   newMessageHandler = (messages) => {
+    if(messages.length < 1) {
+      return;
+    }
+
     bot.startPrivateConversation({
       user: 'U024QEVSU',
       channel: 'D5D6G8VMH'
     }, (err, convo) => {
+      busy = true;
       const str = messages.map((msg, i) => `>${i}. ${msg}`).join('\n');
       convo.ask(str, (resp, conversation) => {
         try {
-          const indexes = resp.text
-            .split(',')
-            .map(x => x.trim())
-            .map(parseIntOrThrow);
+          if(resp.text == 'none') {
+            conversation.say(`Added no items to queue`);
+            conversation.next();
+          } else {
+            const indexes = resp.text
+              .split(',')
+              .map(x => x.trim())
+              .map(parseIntOrThrow);
 
-          indexes
-            .map(i => messages.getOrThrow(i))
-            .forEach(msg => {
-              client.rpush('messages', msg);
-            });
+            indexes
+              .map(i => messages.getOrThrow(i))
+              .forEach(msg => {
+                client.rpush('messages', msg);
+              });
 
-          conversation.say(`Added ${indexes.length} items to queue`);
-          conversation.next();
+            conversation.say(`Added ${indexes.length} items to queue`);
+            conversation.next();
+          }
         } catch(err) {
           console.error('Error', err);
           conversation.say('Invalid response, try again');
           conversation.repeat();
           conversation.next();
+        } finally {
+          busy = false;
         }
       });
     });

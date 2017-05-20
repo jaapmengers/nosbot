@@ -12,11 +12,16 @@ const client = new Twitter({
 });
 
 function getFirstMessage() {
+  console.log('Getting first message');
   return new Promise((resolve, reject) => {
     redisClient.lpop('messages', (err, msg) => {
-      if(err) {
+      if(!msg) {
+        reject(new Error('There\'s no new messages to tweet'))
+      }
+      else if(err) {
         reject(err);
       } else {
+        console.log('Got first message', msg);
         resolve(msg);
       }
     });
@@ -24,6 +29,7 @@ function getFirstMessage() {
 }
 
 function tweet(text, picture) {
+  console.log('Tweeting');
   return new Promise((resolve, reject) => {
     if(!text) {
       reject(new Error('No message is provided for tweet'));
@@ -34,6 +40,7 @@ function tweet(text, picture) {
       if(error) {
         reject(error);
       } else {
+        console.log('Tweet successfull');
         resolve();
       }
     });
@@ -41,18 +48,21 @@ function tweet(text, picture) {
 }
 
 function uploadPicture(pictureData) {
+  console.log('Uploading picture');
   return new Promise((resolve, reject) => {
     client.post('media/upload', { media_data: pictureData }, function(error, media, response) {
       if(error) {
         reject(error);
       } else {
         resolve(media.media_id_string);
+        console.log('Uploaded picture');
       }
     });
   });
 }
 
 function closeConnection() {
+  console.log('Closing connection');
   redisClient.quit();
 }
 
@@ -61,6 +71,7 @@ getFirstMessage()
     .then(uploadPicture)
     .then(pic => ({ msg: msg, pic: pic }))
   )
+  .tap(console.log)
   .then(obj => tweet(obj.msg, obj.pic))
   .catch(console.error)
   .finally(closeConnection);
