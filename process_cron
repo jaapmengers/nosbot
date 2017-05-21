@@ -1,2 +1,2 @@
-0 */12 * * * root bash /src/generate/generate.sh >> /var/log/generating.log 2>&1
+15 13 * * * root bash /src/generate/generate.sh >> /var/log/generating.log 2>&1
 */271 * * * * root bash /src/tweet/tweet.sh >> /var/log/tweeting.log 2>&1
