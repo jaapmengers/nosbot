@@ -17,7 +17,6 @@ COPY startup.sh /src/startup.sh
 
 COPY process_cron /etc/cron.d/process_cron
 RUN chmod 0644 /etc/cron.d/process_cron
-RUN touch /var/log/cron.log
 
 WORKDIR /src/generate
 

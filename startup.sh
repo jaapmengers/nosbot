@@ -9,4 +9,4 @@ cron
 
 forever /src/selection/index.js start >> /var/log/selecting.log 2>&1
 
-tail -f /var/log/cron.log
+tail -f /var/log/generating.log
