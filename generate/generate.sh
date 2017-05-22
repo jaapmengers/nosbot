@@ -7,7 +7,6 @@ then
  prime="Deetman: geen stage dacht ik: bah wijkzorg, maar ik weer meer zomaar steeds te versnipperd"
 fi
 
-python /src/generate/sample.py --prime "$prime" --pick 1
-python /src/generate/sample.py --prime "$prime" --pick 2
+python /src/generate/sample.py --prime "$prime"
 
 redis-cli set prime "$(redis-cli srandmember generated)"

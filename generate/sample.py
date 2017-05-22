@@ -38,8 +38,6 @@ def main():
 def sample(args):
     save_dir = '/temp'
 
-    print(args.prime)
-
     with open(os.path.join(save_dir, 'config.pkl'), 'rb') as f:
         saved_args = cPickle.load(f)
     with open(os.path.join(save_dir, 'words_vocab.pkl'), 'rb') as f:
@@ -51,7 +49,7 @@ def sample(args):
         ckpt = tf.train.get_checkpoint_state(save_dir)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
-            return model.sample(sess, words, vocab, args.n, args.prime, args.sample, args.pick, args.width)
+            return model.sample(sess, words, vocab, args.n, args.prime, args.sample, 1, args.width) + model.sample(sess, words, vocab, args.n, args.prime, args.sample, 2, args.width)
 
 if __name__ == '__main__':
     main()
