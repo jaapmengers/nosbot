@@ -19,6 +19,12 @@ controller.hears(['generate'], ['direct_message'], function(bot, msg) {
   });
 });
 
+controller.hears(['tweet'], ['direct_message'], function(bot, msg) {
+  spawn('node', ['/src/tweet/index.js'], {
+    detached: true
+  });
+});
+
 const conversationFnPromise = startRTM()
   .then(bot => Promise.promisify(bot.startPrivateConversation));
 
@@ -56,7 +62,7 @@ Promise.reduce([getMessages, startConversation], (acc, currFn) => {
           conversation.say(`Added ${indexes.length} items to queue and cleared generated list`);
           conversation.next();
         }
-        
+
         client.del('generated');
         busy = false;
 
